@@ -1,36 +1,42 @@
-name: 'Deploy'
+name: Terraform Deploy
+
 on:
   push:
     branches:
       - master
+
+defaults:
+  run:
+    working-directory: ./terraform
+
 jobs:
-  deploy-to-azure:
-    name: 'Deploy to Azure'
-    env:
-      ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-      ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-      ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-      ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+  terraform:
     runs-on: ubuntu-latest
+
+    env:
+      ARM_CLIENT_ID: ${{secrets.ARM_CLIENT_ID}}
+      ARM_CLIENT_SECRET: ${{secrets.ARM_CLIENT_SECRET}}
+      ARM_SUBSCRIPTION_ID: ${{secrets.ARM_SUBSCRIPTION_ID}}
+      ARM_TENANT_ID: ${{secrets.ARM_TENANT_ID}}
+
     steps:
-      - name: 'Checkout'
-        uses: actions/checkout@master
+      - uses: actions/checkout@v2
 
-      - name: 'Terraform Init'
-        uses: hashicorp/terraform-github-actions@master
-        with:
-          tf_actions_version: 0.12.24
-          tf_actions_subcommand: 'init'
-          tf_actions_working_dir: "./terraform"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
 
-      - name: 'Terraform Apply'
-        uses: hashicorp/terraform-github-actions@master
-        with:
-          tf_actions_version: 0.12.24
-          tf_actions_subcommand: 'apply'
-          tf_actions_working_dir: "./terraform"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Terraform Init
+        run: terraform init
+        
+      - name: Terraform Validate
+        run: terraform validate
 
+      - name: Terraform Plan
+        run: terraform plan
+      - run: echo ${{ steps.plan.outputs.stdout }}
+      - run: echo ${{ steps.plan.outputs.stderr }}
+      - run: echo ${{ steps.plan.outputs.exitcode }}
+
+      - name: Terraform Apply
+        if: ${{ github.event_name == 'push' }}
+        run: terraform apply --auto-approve
