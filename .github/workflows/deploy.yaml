@@ -3,7 +3,7 @@ name: Terraform Deploy
 on:
   pull_request:
     branches:
-      - master
+      - main
 
 defaults:
   run:
