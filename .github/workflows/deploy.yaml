@@ -12,14 +12,17 @@ defaults:
 jobs:
   terraform:
     runs-on: ubuntu-latest
-    env:
-      ARM_CLIENT_ID: ${{secrets.ARM_CLIENT_ID}}
-      ARM_CLIENT_SECRET: ${{secrets.ARM_CLIENT_SECRET}}
-      ARM_SUBSCRIPTION_ID: ${{secrets.ARM_SUBSCRIPTION_ID}}
-      ARM_TENANT_ID: ${{secrets.ARM_TENANT_ID}}
 
     steps:
       - uses: actions/checkout@v2
+
+    - name: Azure CLI script
+      uses: azure/CLI@v1
+      with:
+        azcliversion: 2.0.72
+        inlineScript: |
+          az login -u ${{secrets.AZ_USERNAME}} -p ${{secrets.AZ_PASSWORD}}
+          az account show
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
