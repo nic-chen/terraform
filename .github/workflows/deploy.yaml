@@ -16,20 +16,20 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-    - name: Azure CLI script
-      uses: azure/CLI@v1
-      with:
-        azcliversion: 2.0.72
-        inlineScript: |
-          az login -u ${{secrets.AZ_USERNAME}} -p ${{secrets.AZ_PASSWORD}}
-          az account show
+      - name: Azure CLI script
+        uses: azure/CLI@v1
+        with:
+          azcliversion: 2.0.72
+          inlineScript: |
+            az login -u ${{secrets.AZ_USERNAME}} -p ${{secrets.AZ_PASSWORD}}
+            az account show
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
 
       - name: Terraform Init
         run: terraform init
-        
+
       - name: Terraform Validate
         run: terraform validate
 
